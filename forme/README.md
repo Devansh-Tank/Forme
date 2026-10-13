@@ -2,6 +2,8 @@
 
 ## Scroll motion
 
+The hero video expands with native scrolling from its original frame to the full viewport, holds briefly using sticky positioning, and releases into the next section. Scrolling upward reverses the expansion. Reduced motion retains the original still and normal document flow. The video asset is unchanged.
+
 The hero heading arrives in 620ms and its image follows at 160ms, completing within 810ms. A reserved header space prevents layout jumps as the fixed navigation becomes compact and translucent beyond the hero. Desktop project hover and keyboard focus gently brighten imagery and shift titles 4px, leaving project numbers stationary. The hero caption fades in once when playback starts, with an autoplay/loading fallback. All added animation respects reduced motion.
 
 Sections reveal once with 20px travel and 720ms easing. Heading lines are staggered by 85ms, with supporting content following gently. Desktop project images drift through 5% of their frame height, and a fixed 2px yellow line shows reading progress. Native project disclosures open and close with interruptible 360ms height animation. Keyboard focus exposes content immediately. Reduced motion disables reveals, parallax, and disclosure animation; mobile layouts omit parallax. No scroll interception is used.

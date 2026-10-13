@@ -79,9 +79,50 @@ progressLine.className = 'reading-progress';
 progressLine.setAttribute('aria-hidden', 'true');
 document.body.append(progressLine);
 const projectImages = Array.from(document.querySelectorAll('.project-image'));
+// Keep the original frame in document flow and let native sticky positioning
+// carry the expanded video. Scroll is never intercepted or locked.
+const heroFrame = document.querySelector('.hero-image');
+const heroStage = document.createElement('div');
+heroStage.className = 'hero-stage';
+heroFrame.before(heroStage);
+heroStage.append(heroFrame);
+let heroGeometry = null;
+function measureHeroExpansion() {
+  const enabled = !motionPreference.matches;
+  heroStage.classList.toggle('can-expand', enabled);
+  if (!enabled) {
+    heroGeometry = null;
+    heroFrame.style.removeProperty('width');
+    heroFrame.style.removeProperty('height');
+    heroFrame.style.removeProperty('margin-left');
+    heroStage.style.removeProperty('height');
+    return;
+  }
+  const viewportWidth = document.documentElement.clientWidth;
+  const viewportHeight = innerHeight;
+  const baseHeight = viewportWidth <= 640 ? 420 : Math.min(650, Math.max(350, viewportWidth * .43));
+  const rect = heroStage.getBoundingClientRect();
+  heroGeometry = { width: rect.width, left: rect.left, baseHeight, viewportWidth, viewportHeight };
+  heroStage.style.height = `${Math.max(baseHeight, viewportHeight) + viewportHeight * .7}px`;
+}
+function renderHeroExpansion() {
+  if (!heroGeometry) return;
+  const { width, left, baseHeight, viewportWidth, viewportHeight } = heroGeometry;
+  const top = heroStage.getBoundingClientRect().top;
+  const travel = Math.max(1, Math.min(viewportHeight * .55, top + scrollY));
+  const progress = Math.max(0, Math.min(1, 1 - top / travel));
+  const eased = progress * progress * (3 - 2 * progress);
+  heroFrame.style.width = `${width + (viewportWidth - width) * eased}px`;
+  heroFrame.style.height = `${baseHeight + (viewportHeight - baseHeight) * eased}px`;
+  heroFrame.style.marginLeft = `${-left * eased}px`;
+}
+measureHeroExpansion();
+addEventListener('resize', measureHeroExpansion);
+motionPreference.addEventListener('change', measureHeroExpansion);
 let scrollFrame = 0;
 function renderScrollMotion() {
   scrollFrame = 0;
+  renderHeroExpansion();
   siteHeader.classList.toggle('is-compact', heroSection.getBoundingClientRect().bottom <= headerSpace.offsetHeight);
   const scrollableHeight = document.documentElement.scrollHeight - innerHeight;
   const progress = scrollableHeight > 0 ? Math.min(1, Math.max(0, scrollY / scrollableHeight)) : 0;
